@@ -8,10 +8,11 @@ var supportedOperatingSystems = new Map([
 var archInfoMap = new Map([
   ['cuda', {title: "CUDA", platforms: new Set(['linux', 'windows'])}],
   ['rocm', {title: "ROCm", platforms: new Set(['linux'])}],
-  ['accnone', {title: "CPU", platforms: new Set(['linux', 'macos', 'windows'])}]
+  ['accnone', {title: "CPU", platforms: new Set(['linux', 'macos', 'windows'])}],
+  ['xpu', {title: "XPU", platforms: new Set(['linux', 'windows'])}]
 ]);
 
-let version_map={"nightly": {"accnone": ["cpu", ""], "cuda.x": ["cuda", "12.6"], "cuda.y": ["cuda", "12.8"], "cuda.z": ["cuda", "13.0"], "rocm5.x": ["rocm", "7.0"]}, "release": {"accnone": ["cpu", ""], "cuda.x": ["cuda", "12.6"], "cuda.y": ["cuda", "12.8"], "cuda.z": ["cuda", "12.9"], "rocm5.x": ["rocm", "6.4"]}}
+let version_map={"nightly": {"accnone": ["cpu", ""], "cuda.x": ["cuda", "12.6"], "cuda.y": ["cuda", "12.8"], "cuda.z": ["cuda", "13.0"], "rocm5.x": ["rocm", "7.0"], "xpu": ["xpu", ""]}, "release": {"accnone": ["cpu", ""], "cuda.x": ["cuda", "12.6"], "cuda.y": ["cuda", "12.8"], "cuda.z": ["cuda", "12.9"], "rocm5.x": ["rocm", "6.4"], "xpu": ["xpu", ""]}}
 let stable_version="Stable (2.8.0)";
 
 var default_selected_os = getAnchorSelectedOS() || getDefaultSelectedOS();
@@ -273,59 +274,71 @@ function commandMessage(key) {
     "preview,pip,linux,cuda.y,python": "pip3 install --pre torch torchvision --index-url https://download.pytorch.org/whl/nightly/cu128",
     "preview,pip,linux,cuda.z,python": "pip3 install --pre torch torchvision --index-url https://download.pytorch.org/whl/nightly/cu130",
     "preview,pip,linux,rocm5.x,python": "pip3 install --pre torch torchvision --index-url https://download.pytorch.org/whl/nightly/rocm7.0",
+    "preview,pip,linux,xpu,python": "pip3 install --pre torch torchvision torchaudio --index-url https://download.pytorch.org/whl/nightly/xpu",
     "preview,libtorch,linux,accnone,cplusplus": "Download here (cxx11 ABI):<br /><a href='https://download.pytorch.org/libtorch/nightly/cpu/libtorch-shared-with-deps-latest.zip'>https://download.pytorch.org/libtorch/nightly/cpu/libtorch-shared-with-deps-latest.zip</a>", "preview,libtorch,linux,cuda.x,cplusplus": "Download here (cxx11 ABI):<br /><a href='https://download.pytorch.org/libtorch/nightly/cu126/libtorch-shared-with-deps-latest.zip'>https://download.pytorch.org/libtorch/nightly/cu126/libtorch-shared-with-deps-latest.zip</a>",
     "preview,libtorch,linux,cuda.y,cplusplus": "Download here (cxx11 ABI):<br /><a href='https://download.pytorch.org/libtorch/nightly/cu128/libtorch-shared-with-deps-latest.zip'>https://download.pytorch.org/libtorch/nightly/cu128/libtorch-shared-with-deps-latest.zip</a>", "preview,libtorch,linux,cuda.z,cplusplus": "Download here (cxx11 ABI):<br /><a href='https://download.pytorch.org/libtorch/nightly/cu130/libtorch-shared-with-deps-latest.zip'>https://download.pytorch.org/libtorch/nightly/cu130/libtorch-shared-with-deps-latest.zip</a>",
     "preview,libtorch,linux,rocm5.x,cplusplus": "Download here (cxx11 ABI):<br /><a href='https://download.pytorch.org/libtorch/nightly/rocm7.0/libtorch-shared-with-deps-latest.zip'>https://download.pytorch.org/libtorch/nightly/rocm7.0/libtorch-shared-with-deps-latest.zip</a>",
+    "preview,libtorch,linux,xpu,cplusplus": "<b>NOTE:</b> LibTorch package is not currently available for XPU",
     "preview,pip,macos,cuda.x,python": "# CUDA is not available on MacOS, please use default package<br />pip3 install --pre torch torchvision --index-url https://download.pytorch.org/whl/nightly/cpu",
     "preview,pip,macos,cuda.y,python": "# CUDA is not available on MacOS, please use default package<br />pip3 install --pre torch torchvision --index-url https://download.pytorch.org/whl/nightly/cpu",
     "preview,pip,macos,cuda.z,python": "# CUDA is not available on MacOS, please use default package<br />pip3 install --pre torch torchvision --index-url https://download.pytorch.org/whl/nightly/cpu",
     "preview,pip,macos,rocm5.x,python": "# ROCm is not available on MacOS, please use default package<br />pip3 install --pre torch torchvision --index-url https://download.pytorch.org/whl/nightly/cpu",
+    "preview,pip,macos,xpu,python": "# XPU is not available on MacOS, please use default package<br />pip3 install --pre torch torchvision torchaudio --index-url https://download.pytorch.org/whl/nightly/cpu",
     "preview,pip,macos,accnone,python": "pip3 install --pre torch torchvision --index-url https://download.pytorch.org/whl/nightly/cpu",
     "preview,libtorch,macos,accnone,cplusplus": "Download arm64 libtorch here (ROCm and CUDA are not supported):<br /><a href='https://download.pytorch.org/libtorch/nightly/cpu/libtorch-macos-arm64-latest.zip'>https://download.pytorch.org/libtorch/nightly/cpu/libtorch-macos-arm64-latest.zip</a>",
     "preview,libtorch,macos,cuda.x,cplusplus": "Download arm64 libtorch here (ROCm and CUDA are not supported):<br /><a href='https://download.pytorch.org/libtorch/nightly/cpu/libtorch-macos-arm64-latest.zip'>https://download.pytorch.org/libtorch/nightly/cpu/libtorch-macos-arm64-latest.zip</a>",
     "preview,libtorch,macos,cuda.y,cplusplus": "Download arm64 libtorch here (ROCm and CUDA are not supported):<br /><a href='https://download.pytorch.org/libtorch/nightly/cpu/libtorch-macos-arm64-latest.zip'>https://download.pytorch.org/libtorch/nightly/cpu/libtorch-macos-arm64-latest.zip</a>",
     "preview,libtorch,macos,cuda.z,cplusplus": "Download arm64 libtorch here (ROCm and CUDA are not supported):<br /><a href='https://download.pytorch.org/libtorch/nightly/cpu/libtorch-macos-arm64-latest.zip'>https://download.pytorch.org/libtorch/nightly/cpu/libtorch-macos-arm64-latest.zip</a>",
     "preview,libtorch,macos,rocm5.x,cplusplus": "Download arm64 libtorch here (ROCm and CUDA are not supported):<br /><a href='https://download.pytorch.org/libtorch/nightly/cpu/libtorch-macos-arm64-latest.zip'>https://download.pytorch.org/libtorch/nightly/cpu/libtorch-macos-arm64-latest.zip</a>",
+    "preview,libtorch,macos,xpu,python": "<b>XPU is not available on MacOS",
     "preview,pip,windows,accnone,python": "pip3 install --pre torch torchvision --index-url https://download.pytorch.org/whl/nightly/cpu",
     "preview,pip,windows,cuda.x,python": "pip3 install --pre torch torchvision --index-url https://download.pytorch.org/whl/nightly/cu126",
     "preview,pip,windows,cuda.y,python": "pip3 install --pre torch torchvision --index-url https://download.pytorch.org/whl/nightly/cu128",
     "preview,pip,windows,cuda.z,python": "pip3 install --pre torch torchvision --index-url https://download.pytorch.org/whl/nightly/cu130",
     "preview,pip,windows,rocm5.x,python": "<b>NOTE:</b> ROCm is not available on Windows",
+    "preview,pip,windows,xpu,python": "pip3 install --pre torch torchvision torchaudio --index-url https://download.pytorch.org/whl/nightly/xpu",
     "preview,libtorch,windows,accnone,cplusplus": "Download here (Release version):<br /><a href='https://download.pytorch.org/libtorch/nightly/cpu/libtorch-win-shared-with-deps-latest.zip'>https://download.pytorch.org/libtorch/nightly/cpu/libtorch-win-shared-with-deps-latest.zip</a><br />Download here (Debug version):<br /><a href='https://download.pytorch.org/libtorch/nightly/cpu/libtorch-win-shared-with-deps-debug-latest.zip'>https://download.pytorch.org/libtorch/nightly/cpu/libtorch-win-shared-with-deps-debug-latest.zip</a>",
     "preview,libtorch,windows,cuda.x,cplusplus": "Download here (Release version):<br /><a href='https://download.pytorch.org/libtorch/nightly/cu126/libtorch-win-shared-with-deps-latest.zip'>https://download.pytorch.org/libtorch/nightly/cu126/libtorch-win-shared-with-deps-latest.zip</a><br />Download here (Debug version):<br /><a href='https://download.pytorch.org/libtorch/nightly/cu126/libtorch-win-shared-with-deps-debug-latest.zip'>https://download.pytorch.org/libtorch/nightly/cu126/libtorch-win-shared-with-deps-debug-latest.zip</a>",
     "preview,libtorch,windows,cuda.y,cplusplus": "Download here (Release version):<br /><a href='https://download.pytorch.org/libtorch/nightly/cu128/libtorch-win-shared-with-deps-latest.zip'>https://download.pytorch.org/libtorch/nightly/cu128/libtorch-win-shared-with-deps-latest.zip</a><br />Download here (Debug version):<br /><a href='https://download.pytorch.org/libtorch/nightly/cu128/libtorch-win-shared-with-deps-debug-latest.zip'>https://download.pytorch.org/libtorch/nightly/cu128/libtorch-win-shared-with-deps-debug-latest.zip</a>",
     "preview,libtorch,windows,cuda.z,cplusplus": "Download here (Release version):<br /><a href='https://download.pytorch.org/libtorch/nightly/cu130/libtorch-win-shared-with-deps-latest.zip'>https://download.pytorch.org/libtorch/nightly/cu130/libtorch-win-shared-with-deps-latest.zip</a><br />Download here (Debug version):<br /><a href='https://download.pytorch.org/libtorch/nightly/cu130/libtorch-win-shared-with-deps-debug-latest.zip'>https://download.pytorch.org/libtorch/nightly/cu130/libtorch-win-shared-with-deps-debug-latest.zip</a>",
     "preview,libtorch,windows,rocm5.x,cplusplus": "<b>NOTE:</b> ROCm is not available on Windows",
+    "preview,libtorch,windows,xpu,cplusplus": "<b>NOTE:</b> LibTorch package is not currently available for XPU",
     "stable,pip,linux,accnone,python": "pip3 install torch torchvision --index-url https://download.pytorch.org/whl/cpu",
     "stable,pip,linux,cuda.x,python": "pip3 install torch torchvision --index-url https://download.pytorch.org/whl/cu126",
     "stable,pip,linux,cuda.y,python": "pip3 install torch torchvision",
     "stable,pip,linux,cuda.z,python": "pip3 install torch torchvision --index-url https://download.pytorch.org/whl/cu129",
     "stable,pip,linux,rocm5.x,python": "pip3 install torch torchvision --index-url https://download.pytorch.org/whl/rocm6.4",
+    "stable,pip,linux,xpu,python": "pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/xpu",
     "stable,libtorch,linux,accnone,cplusplus": "Download here (cxx11 ABI):<br /><a href='https://download.pytorch.org/libtorch/cpu/libtorch-shared-with-deps-2.8.0%2Bcpu.zip'>https://download.pytorch.org/libtorch/cpu/libtorch-shared-with-deps-2.8.0%2Bcpu.zip</a>",
     "stable,libtorch,linux,cuda.x,cplusplus": "Download here (cxx11 ABI):<br /><a href='https://download.pytorch.org/libtorch/cu126/libtorch-shared-with-deps-2.8.0%2Bcu126.zip'>https://download.pytorch.org/libtorch/cu126/libtorch-shared-with-deps-2.8.0%2Bcu126.zip</a>",
     "stable,libtorch,linux,cuda.y,cplusplus": "Download here (cxx11 ABI):<br /><a href='https://download.pytorch.org/libtorch/cu128/libtorch-shared-with-deps-2.8.0%2Bcu128.zip'>https://download.pytorch.org/libtorch/cu128/libtorch-shared-with-deps-2.8.0%2Bcu128.zip</a>",
     "stable,libtorch,linux,cuda.z,cplusplus": "Download here (cxx11 ABI):<br /><a href='https://download.pytorch.org/libtorch/cu129/libtorch-shared-with-deps-2.8.0%2Bcu129.zip'>https://download.pytorch.org/libtorch/cu129/libtorch-shared-with-deps-2.8.0%2Bcu129.zip</a>",
     "stable,libtorch,linux,rocm5.x,cplusplus": "Download here (cxx11 ABI):<br /><a href='https://download.pytorch.org/libtorch/rocm6.4/libtorch-shared-with-deps-2.8.0%2Brocm6.4.zip'>https://download.pytorch.org/libtorch/rocm6.4/libtorch-shared-with-deps-2.8.0%2Brocm6.4.zip</a>",
+    "stable,libtorch,linux,xpu,cplusplus": "<b>NOTE:</b> LibTorch package is not currently available for XPU",
     "stable,pip,macos,cuda.x,python": "# CUDA is not available on MacOS, please use default package<br />pip3 install torch torchvision",
     "stable,pip,macos,cuda.y,python": "# CUDA is not available on MacOS, please use default package<br />pip3 install torch torchvision",
     "stable,pip,macos,cuda.z,python": "# CUDA is not available on MacOS, please use default package<br />pip3 install torch torchvision",
     "stable,pip,macos,rocm5.x,python": "# ROCm is not available on MacOS, please use default package<br />pip3 install torch torchvision",
+    "stable,pip,macos,xpu,python": "# XPU is not available on MacOS, please use default package<br />pip3 install torch torchvision torchaudio",
     "stable,pip,macos,accnone,python": "pip3 install torch torchvision",
     "stable,libtorch,macos,accnone,cplusplus": "Download arm64 libtorch here (ROCm and CUDA are not supported):<br /><a href='https://download.pytorch.org/libtorch/cpu/libtorch-macos-arm64-2.8.0.zip'>https://download.pytorch.org/libtorch/cpu/libtorch-macos-arm64-2.8.0.zip</a>",
     "stable,libtorch,macos,cuda.x,cplusplus": "Download arm64 libtorch here (ROCm and CUDA are not supported):<br /><a href='https://download.pytorch.org/libtorch/cpu/libtorch-macos-arm64-2.8.0.zip'>https://download.pytorch.org/libtorch/cpu/libtorch-macos-arm64-2.8.0.zip</a>",
     "stable,libtorch,macos,cuda.y,cplusplus": "Download arm64 libtorch here (ROCm and CUDA are not supported):<br /><a href='https://download.pytorch.org/libtorch/cpu/libtorch-macos-arm64-2.8.0.zip'>https://download.pytorch.org/libtorch/cpu/libtorch-macos-arm64-2.8.0.zip</a>",
     "stable,libtorch,macos,cuda.z,cplusplus": "Download arm64 libtorch here (ROCm and CUDA are not supported):<br /><a href='https://download.pytorch.org/libtorch/cpu/libtorch-macos-arm64-2.8.0.zip'>https://download.pytorch.org/libtorch/cpu/libtorch-macos-arm64-2.8.0.zip</a>",
     "stable,libtorch,macos,rocm5.x,cplusplus": "Download arm64 libtorch here (ROCm and CUDA are not supported):<br /><a href='https://download.pytorch.org/libtorch/cpu/libtorch-macos-arm64-2.8.0.zip'>https://download.pytorch.org/libtorch/cpu/libtorch-macos-arm64-2.8.0.zip</a>",
+    "stable,libtorch,macos,xpu,cplusplus": "<b>XPU is not available on MacOS",
     "stable,pip,windows,accnone,python": "pip3 install torch torchvision",
     "stable,pip,windows,cuda.x,python": "pip3 install torch torchvision --index-url https://download.pytorch.org/whl/cu126",
     "stable,pip,windows,cuda.y,python": "pip3 install torch torchvision --index-url https://download.pytorch.org/whl/cu128",
     "stable,pip,windows,cuda.z,python": "pip3 install torch torchvision --index-url https://download.pytorch.org/whl/cu129",
     "stable,pip,windows,rocm5.x,python": "<b>NOTE:</b> ROCm is not available on Windows",
+    "stable,pip,windows,xpu,python": "pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/xpu",
     "stable,libtorch,windows,accnone,cplusplus": "Download here (Release version):<br /><a href='https://download.pytorch.org/libtorch/cpu/libtorch-win-shared-with-deps-2.8.0%2Bcpu.zip'>https://download.pytorch.org/libtorch/cpu/libtorch-win-shared-with-deps-2.8.0%2Bcpu.zip</a><br />Download here (Debug version):<br /><a href='https://download.pytorch.org/libtorch/cpu/libtorch-win-shared-with-deps-debug-2.8.0%2Bcpu.zip'>https://download.pytorch.org/libtorch/cpu/libtorch-win-shared-with-deps-debug-2.8.0%2Bcpu.zip</a>",
     "stable,libtorch,windows,cuda.x,cplusplus": "Download here (Release version):<br /><a href='https://download.pytorch.org/libtorch/cu126/libtorch-win-shared-with-deps-2.8.0%2Bcu126.zip'>https://download.pytorch.org/libtorch/cu126/libtorch-win-shared-with-deps-2.8.0%2Bcu126.zip</a><br />Download here (Debug version):<br /><a href='https://download.pytorch.org/libtorch/cu126/libtorch-win-shared-with-deps-debug-2.8.0%2Bcu126.zip'>https://download.pytorch.org/libtorch/cu126/libtorch-win-shared-with-deps-debug-2.8.0%2Bcu126.zip</a>",
     "stable,libtorch,windows,cuda.y,cplusplus": "Download here (Release version):<br /><a href='https://download.pytorch.org/libtorch/cu128/libtorch-win-shared-with-deps-2.8.0%2Bcu128.zip'>https://download.pytorch.org/libtorch/cu128/libtorch-win-shared-with-deps-2.8.0%2Bcu128.zip</a><br />Download here (Debug version):<br /><a href='https://download.pytorch.org/libtorch/cu128/libtorch-win-shared-with-deps-debug-2.8.0%2Bcu128.zip'>https://download.pytorch.org/libtorch/cu128/libtorch-win-shared-with-deps-debug-2.8.0%2Bcu128.zip</a>",
     "stable,libtorch,windows,cuda.z,cplusplus": "Download here (Release version):<br /><a href='https://download.pytorch.org/libtorch/cu129/libtorch-win-shared-with-deps-2.8.0%2Bcu129.zip'>https://download.pytorch.org/libtorch/cu129/libtorch-win-shared-with-deps-2.8.0%2Bcu129.zip</a><br />Download here (Debug version):<br /><a href='https://download.pytorch.org/libtorch/cu129/libtorch-win-shared-with-deps-debug-2.8.0%2Bcu129.zip'>https://download.pytorch.org/libtorch/cu129/libtorch-win-shared-with-deps-debug-2.8.0%2Bcu129.zip</a>",
-    "stable,libtorch,windows,rocm5.x,cplusplus": "<b>NOTE:</b> ROCm is not available on Windows"
+    "stable,libtorch,windows,rocm5.x,cplusplus": "<b>NOTE:</b> ROCm is not available on Windows",
+    "stable,libtorch,windows,xpu,cplusplus": "<b>NOTE:</b> LibTorch package is not currently available for XPU"
   };
 
   if (!object.hasOwnProperty(key)) {
