@@ -35,6 +35,7 @@ var os = $(".os > .option");
 var package = $(".package > .option");
 var language = $(".language > .option");
 var cuda = $(".cuda > .option");
+var accelerator = $(".accelerator > .option");
 var ptbuild = $(".ptbuild > .option");
 
 os.on("click", function() {
@@ -47,6 +48,13 @@ language.on("click", function() {
   selectedOption(language, this, "language");
 });
 cuda.on("click", function() {
+  if (this.id != 'accelerators') {
+    $(accelerator).removeClass("selected");
+    $('#accelerators').removeClass("selected");
+    selectedOption(cuda, this, "cuda");
+  }
+});
+accelerator.on("click", function() {
   selectedOption(cuda, this, "cuda");
 });
 ptbuild.on("click", function() {
@@ -173,6 +181,9 @@ function changeAccNoneName(osname) {
 function selectedOption(option, selection, category) {
   $(option).removeClass("selected");
   $(selection).addClass("selected");
+  if ($(selection).is(".dropdown-item")) {
+    $('#accelerators').addClass("selected");
+  }
   opts[category] = selection.id;
   if (category === "pm") {
     var elements = document.getElementsByClassName("language")[0].children;
